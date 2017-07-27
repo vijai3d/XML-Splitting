@@ -1,0 +1,14 @@
+<record-table>
+  <!--1 or more repetitions:-->
+  <record>
+    <record_id>10</record_id>
+    <record_rows>
+      <!--1 to 30 repetitions:-->
+      <record_row>string</record_row>
+    </record_rows>
+  </record>
+  <footer>
+    <record_count>10</record_count>
+    <record_row_count>10</record_row_count>
+  </footer>
+</record-table>
