@@ -5,8 +5,6 @@ import com.vijai.classes.Record;
 import com.vijai.classes.RecordTable;
 import com.vijai.classes.Row;
 import com.vijai.utils.RandomString;
-
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -20,22 +18,28 @@ public class Main {
 
     public static void main(String[] args) throws JAXBException {
 
-        //input parameters
-        com.vijai.classes.RecordTable recordTable = new com.vijai.classes.RecordTable();
+        RecordTable recordTable = new RecordTable();
+
         Scanner sc = new Scanner(System.in);
         System.out.print("How many record elements to generate? ");
-        while (!sc.hasNextInt()) sc.next();
+        while (!sc.hasNextLong()) sc.next(); //allow input long type numbers only
         int recordsCount = sc.nextInt();
+
+        Footer footer = new Footer();
+        footer.setRecordCount(recordsCount);
+        int recordRowCount = 0;
+
         List<Record> recordList = new ArrayList<>();
         // record element
         for (int i=0; i<recordsCount; i++) {
             List<String> stringList = new ArrayList<>(); // every record - new string list
             Record record = new Record();
             record.setRecordId((long) (i+1));
-            // random number of strin rows
+            // random number of random string rows
             Random random = new Random();
             int randomNumber = random.nextInt(30)+1;
-            System.out.println(randomNumber);
+            recordRowCount = recordRowCount + randomNumber;
+
             for (int r = 0; r < randomNumber; r++) { //how many rows to add
                 RandomString string = new RandomString();
                 String randomString = string.getRandomString();
@@ -47,13 +51,8 @@ public class Main {
             recordList.add(record); //create record
         }
         recordTable.setRecord(recordList); // creates list of records
-
-        //footer part
-        Footer footer = new Footer();
-
-
-
-        recordTable.setFooter(new Footer());
+        footer.setRecordRowCount(recordRowCount);
+        recordTable.setFooter(footer); // creates footer
 
         JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

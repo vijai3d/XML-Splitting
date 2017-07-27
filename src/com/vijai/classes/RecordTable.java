@@ -1,6 +1,5 @@
 package com.vijai.classes;
 
-
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.List;
@@ -27,5 +26,4 @@ public class RecordTable {
     public void setFooter(Footer footer) {
         this.footer = footer;
     }
-
 }
