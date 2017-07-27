@@ -5,10 +5,13 @@ import com.vijai.classes.Record;
 import com.vijai.classes.RecordTable;
 import com.vijai.classes.Row;
 import com.vijai.utils.RandomString;
+import com.vijai.utils.XmlValidation;
+import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,7 +19,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws JAXBException {
+    public static void main(String[] args) throws JAXBException, SAXException, IOException {
 
         RecordTable recordTable = new RecordTable();
 
@@ -59,5 +62,14 @@ public class Main {
         jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
         jaxbMarshaller.marshal( recordTable, new File( "src/output/recordFile.xml" ) );
         jaxbMarshaller.marshal( recordTable, System.out );
+
+        // validate with schema
+        XmlValidation validation = new XmlValidation();
+        Record record = new Record();
+        Row row = new Row();
+        validation.validate(recordTable);
+        validation.validate(footer);
+        validation.validate(record);
+        validation.validate(row);
     }
 }
