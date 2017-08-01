@@ -1,6 +1,6 @@
 package com.vijai.utils;
 
-import com.vijai.classes.RecordTable;
+import com.vijai.xmlClasses.RecordTable;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -16,7 +16,7 @@ import java.io.IOException;
 public class XmlValidation {
     public void validate(Object o) throws SAXException, JAXBException, IOException {
         SchemaFactory sf = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
-        Schema schema = sf.newSchema( new File( "src/xsd/task3.xsd" ) );
+        Schema schema = sf.newSchema( new File( "src/main/java/xsd/task3.xsd" ) );
         JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
         JAXBSource sourceRecordTable = new JAXBSource( jaxbContext, o );
         Validator validator = schema.newValidator();

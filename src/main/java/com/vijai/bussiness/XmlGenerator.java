@@ -1,12 +1,13 @@
-package com.vijai;
+package com.vijai.bussiness;
 
-import com.vijai.classes.Footer;
-import com.vijai.classes.Record;
-import com.vijai.classes.RecordTable;
-import com.vijai.classes.Row;
 import com.vijai.utils.RandomString;
 import com.vijai.utils.XmlValidation;
+import com.vijai.xmlClasses.Footer;
+import com.vijai.xmlClasses.Record;
+import com.vijai.xmlClasses.RecordTable;
+import com.vijai.xmlClasses.Row;
 import org.xml.sax.SAXException;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -17,25 +18,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Main {
-
-    public static void main(String[] args) throws JAXBException, SAXException, IOException {
-
+public class XmlGenerator {
+    public void generate() throws JAXBException, IOException, SAXException {
         RecordTable recordTable = new RecordTable();
 
         Scanner sc = new Scanner(System.in);
         System.out.print("How many record elements to generate? ");
         while (!sc.hasNextLong()) sc.next(); //allow input long type numbers only
-        int recordsCount = sc.nextInt();
+        long recordsCount = sc.nextLong();
 
         Footer footer = new Footer();
         footer.setRecordCount(recordsCount);
         int recordRowCount = 0;
 
-        List<Record> recordList = new ArrayList<>();
+        List<Record> recordList = new ArrayList<Record>();
         // record element
-        for (int i=0; i<recordsCount; i++) {
-            List<String> stringList = new ArrayList<>(); // every record - new string list
+        for (long i=0; i<recordsCount; i++) {
+            List<String> stringList = new ArrayList<String>(); // every record - new string list
             Record record = new Record();
             record.setRecordId((long) (i+1));
             // random number of random string rows
@@ -49,7 +48,7 @@ public class Main {
                 stringList.add(randomString);
                 Row row = new Row();
                 row.setString(stringList);
-                record.setRecordRow(row);
+                record.setRecordRow((List<Row>) row);
             }
             recordList.add(record); //create record
         }
@@ -60,7 +59,7 @@ public class Main {
         JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
-        jaxbMarshaller.marshal( recordTable, new File( "src/output/recordFile.xml" ) );
+        jaxbMarshaller.marshal( recordTable, new File( "src/main/resources/recordFile.xml" ) );
         jaxbMarshaller.marshal( recordTable, System.out );
 
         // validate with schema
