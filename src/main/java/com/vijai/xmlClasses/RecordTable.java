@@ -26,4 +26,12 @@ public class RecordTable {
     public void setFooter(Footer footer) {
         this.footer = footer;
     }
+
+    @Override
+    public String toString() {
+        return "RecordTable{" +
+                "record=" + record +
+                ", footer=" + footer +
+                '}';
+    }
 }
