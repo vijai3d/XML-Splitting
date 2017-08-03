@@ -1,39 +1,244 @@
 package com.vijai;
 
-import com.vijai.xmlClasses.Record;
-import com.vijai.xmlClasses.RecordTable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import com.sun.xml.internal.stream.events.XMLEventAllocatorImpl;
+import com.ximpleware.NavException;
+import com.ximpleware.XPathEvalException;
+import com.ximpleware.XPathParseException;
 import org.xml.sax.SAXException;
-
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.OutputKeys;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.*;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringWriter;
-
-import com.ximpleware.*;
 
 public class Main {
-        final int TAG_SYMBOLS = 5;
-        final int userGivenSize = 1024/2;
 
-    public static void main(String[] args) throws JAXBException, IOException, TransformerException, XMLStreamException, XPathExpressionException, ParserConfigurationException, SAXException, XPathParseException, NavException, XPathEvalException {
+    private static XMLEventAllocator allocator;
+
+    public static void main(String[] args) throws XPathParseException, NavException, XPathEvalException, IOException, JAXBException, SAXException, XMLStreamException, TransformerException {
+       /* XmlGenerator xml = new XmlGenerator();
+        xml.generate();*/
+        int TAGS_SIZE = 0;
+        final int USER_GIVEN_SIZE = 2024 / 2; // bytes to chars
+        final int ROW_SIZE = 200 + 29;
+        String path = "src/main/resources/recordFile.xml";
+        File f = new File(path);
+        TAGS_SIZE = (int) f.length();
+
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        xif.setEventAllocator(new XMLEventAllocatorImpl());
+        allocator = xif.getEventAllocator();
+        XMLStreamReader xsr = xif.createXMLStreamReader(new FileReader("src/main/resources/recordFile.xml"));
+        //xsr.nextTag(); // Advance to statements element
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
+        int j = 0;
+        int eventType = xsr.getEventType();
+        while (xsr.hasNext()) {
+            eventType = xsr.next();
+            // Get all "record" elements as XMLEvent object
+            if (eventType == XMLStreamConstants.START_ELEMENT &&
+                    xsr.getLocalName().equals("record")) {
+                System.out.println(xsr.toString());
+                File file = new File("src/main/resources/" + j + ".xml");
+                t.transform(new StAXSource(xsr), new StreamResult(file));
+                j++;
+            }
+        }
+    }
+}
+
+    /*private static void printEvent(XMLStreamReader xmlr) {
+        System.out.print("EVENT:[" + xmlr.getLocation().getLineNumber() + "][" +
+                xmlr.getLocation().getColumnNumber() + "] ");
+        System.out.print(" [");
+        switch (xmlr.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT:
+                System.out.print("<");
+                printName(xmlr);
+                printNamespaces(xmlr);
+                printAttributes(xmlr);
+                System.out.print(">");
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                System.out.print("</");
+                printName(xmlr);
+                System.out.print(">");
+                break;
+            case XMLStreamConstants.SPACE:
+            case XMLStreamConstants.CHARACTERS:
+                int start = xmlr.getTextStart();
+                int length = xmlr.getTextLength();
+                System.out.print(new String(xmlr.getTextCharacters(),
+                        start,
+                        length));
+                break;
+            case XMLStreamConstants.PROCESSING_INSTRUCTION:
+                System.out.print("<?");
+                if (xmlr.hasText())
+                    System.out.print(xmlr.getText());
+                System.out.print("?>");
+                break;
+            case XMLStreamConstants.CDATA:
+                System.out.print("<![CDATA[");
+                start = xmlr.getTextStart();
+                length = xmlr.getTextLength();
+                System.out.print(new String(xmlr.getTextCharacters(),
+                        start,
+                        length));
+                System.out.print("]]>");
+                break;
+            case XMLStreamConstants.COMMENT:
+                System.out.print("<!--");
+                if (xmlr.hasText())
+                    System.out.print(xmlr.getText());
+                System.out.print("-->");
+                break;
+            case XMLStreamConstants.ENTITY_REFERENCE:
+                System.out.print(xmlr.getLocalName() + "=");
+                if (xmlr.hasText())
+                    System.out.print("[" + xmlr.getText() + "]");
+                break;
+            case XMLStreamConstants.START_DOCUMENT:
+                System.out.print("<?xml");
+                System.out.print(" version='" + xmlr.getVersion() + "'");
+                System.out.print(" encoding='" + xmlr.getCharacterEncodingScheme() + "'");
+                if (xmlr.isStandalone())
+                    System.out.print(" standalone='yes'");
+                else
+                    System.out.print(" standalone='no'");
+                System.out.print("?>");
+                break;
+        }
+        System.out.println("]");
+    }
+
+    private static void printName(XMLStreamReader xmlr) {
+        if (xmlr.hasName()) {
+            String prefix = xmlr.getPrefix();
+            String uri = xmlr.getNamespaceURI();
+            String localName = xmlr.getLocalName();
+            printName(prefix, uri, localName);
+            String charCount = prefix+localName;
+            int length = charCount.length();
+        }
+    }
+
+    private static void printName(String prefix,
+                                  String uri,
+                                  String localName) {
+        if (uri != null && !("".equals(uri))) System.out.print("['" + uri + "']:");
+        if (prefix != null) System.out.print(prefix + ":");
+        if (localName != null) System.out.print(localName);
+    }
+
+    private static void printAttributes(XMLStreamReader xmlr) {
+        for (int i = 0; i < xmlr.getAttributeCount(); i++) {
+            printAttribute(xmlr, i);
+        }
+    }
+
+    private static void printAttribute(XMLStreamReader xmlr, int index) {
+        String prefix = xmlr.getAttributePrefix(index);
+        String namespace = xmlr.getAttributeNamespace(index);
+        String localName = xmlr.getAttributeLocalName(index);
+        String value = xmlr.getAttributeValue(index);
+        System.out.print(" ");
+        printName(prefix, namespace, localName);
+        System.out.print("='" + value + "'");
+    }
+
+    private static void printNamespaces(XMLStreamReader xmlr) {
+        for (int i = 0; i < xmlr.getNamespaceCount(); i++) {
+            printNamespace(xmlr, i);
+        }
+    }
+
+    private static void printNamespace(XMLStreamReader xmlr, int index) {
+        String prefix = xmlr.getNamespacePrefix(index);
+        String uri = xmlr.getNamespaceURI(index);
+        System.out.print(" ");
+        if (prefix == null)
+            System.out.print("xmlns='" + uri + "'");
+        else
+            System.out.print("xmlns:" + prefix + "='" + uri + "'");
+    }
+}*/
+/*  VTDGen vg = new VTDGen();
+        // fill constant tagSize
+        if (vg.parseFile("src/main/java/xsd/tag-template.xml", false)) {
+            VTDNav vn = vg.getNav();
+            AutoPilot ap = new AutoPilot(vn);
+            ap.selectXPath("//*");
+            ap.evalXPath();
+            TAGS_SIZE = vn.getXML().length();
+        }
+
+        int numberOfRowsInFile = (USER_GIVEN_SIZE - TAGS_SIZE) / ROW_SIZE;
+        //System.out.println("Number of rows we can insert in file: " + numberOfRowsInFile);
+        if (vg.parseFile("src/main/resources/recordFile.xml", false)){
+            VTDNav vn = vg.getNav();
+            AutoPilot ap = new AutoPilot(vn);
+            ap.selectXPath("record/record_id");
+            ap.evalXPath();
+            System.out.println(vn.getXML().length());
+        }
+
+        if (vg.parseFile("src/main/resources/recordFile.xml", false)){
+            VTDNav vn = vg.getNav();
+            AutoPilot ap = new AutoPilot(vn);
+            ap.selectXPath("//record-table/record[2]");
+            byte[] header = "<record-table>".getBytes();
+            byte[] tail = "</record-table>".getBytes();
+            ap.evalXPath();
+            System.out.println(vn.getXML().length());
+            int i = -1,n=0;
+            while((i=ap.evalXPath())!=-1){
+                long l = vn.getElementFragment();
+                FileOutputStream fops = new FileOutputStream("src/main/resources/part_"+n+".xml");
+                fops.write(header);
+                fops.write(vn.getXML().getBytes(), (int)l, ((int)(l>>32)));
+                fops.write(tail);
+                vg.parseFile("src/main/resources/part_"+n+".xml", false);
+                VTDNav vn2 = vg.getNav();
+                System.out.println(vn2.getXML().length());
+                fops.close();
+                n++;
+            }
+        }*/
+/*VTDGen vg = new VTDGen();
+        // fill constant tagSize
+        if (vg.parseFile("src/main/java/xsd/tag-template.xml", false)) {
+            VTDNav vn = vg.getNav();
+            AutoPilot ap = new AutoPilot(vn);
+            ap.selectXPath("//*");
+            ap.evalXPath();
+            TAGS_SIZE = vn.getXML().length();
+        }
+
+        int numberOfRowsInFile = (USER_GIVEN_SIZE - TAGS_SIZE) / ROW_SIZE;
+        System.out.println("Number of rows we can insert in file: " + numberOfRowsInFile);
+
+        FastLongBuffer flb = new FastLongBuffer(1);
+        if (vg.parseFile("src/main/resources/recordFile.xml", false)) {
+            VTDNav vn = vg.getNav();
+            AutoPilot ap = new AutoPilot(vn);
+            ap.selectXPath("//record[2]/record_rows/record_row[position()<='"+numberOfRowsInFile+"']");
+            int i = -1;
+            while ((i = ap.evalXPath()) != -1) {
+                System.out.println(vn.toString(i).toString());
+            }
+        }*/
 
 
 
@@ -92,27 +297,6 @@ public class Main {
         StreamResult result =  new StreamResult(new File("src/main/resources/file"  + ".xml"));
         transformer.transform(source, result);*/
 
-
-        VTDGen vg = new VTDGen();
-        if (vg.parseFile("src/main/resources/recordFile.xml", false)){
-            VTDNav vn = vg.getNav();
-            AutoPilot ap = new AutoPilot(vn);
-            ap.selectXPath("/record-table/record");
-            byte[] header = "<record-table>".getBytes();
-            byte[] tail = "</record-table>".getBytes();
-            int i = -1,j=0;
-            while((i=ap.evalXPath())!=-1){
-                long l = vn.getElementFragment();
-                FileOutputStream fops = new FileOutputStream("src/main/resources/"+j+".xml");
-                fops.write(header);
-
-                fops.write(vn.getXML().getBytes(), (int)l, ((int)(l>>32)));
-                fops.write(tail);
-                fops.close();
-                j++;
-            }
-
-        }
        /* XmlGenerator xmlFile = new XmlGenerator();
         xmlFile.generate();
 
@@ -165,8 +349,3 @@ public class Main {
             System.out.println(buf.toString());
         }
 */
-
-
-    }
-
-}

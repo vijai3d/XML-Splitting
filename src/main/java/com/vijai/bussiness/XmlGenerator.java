@@ -31,10 +31,10 @@ public class XmlGenerator {
         footer.setRecordCount(recordsCount);
         int recordRowCount = 0;
 
-        List<Record> recordList = new ArrayList<Record>();
+        List<Record> recordList = new ArrayList();
         // record element
         for (long i=0; i<recordsCount; i++) {
-            List<String> stringList = new ArrayList<String>(); // every record - new string list
+            List<String> stringList = new ArrayList(); // every record - new string list
             Record record = new Record();
             record.setRecordId((long) (i+1));
             // random number of random string rows
@@ -48,7 +48,7 @@ public class XmlGenerator {
                 stringList.add(randomString);
                 Row row = new Row();
                 row.setString(stringList);
-                record.setRecordRow((List<Row>) row);
+                record.setRecordRow(row);
             }
             recordList.add(record); //create record
         }

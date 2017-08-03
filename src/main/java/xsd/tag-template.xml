@@ -1,0 +1,11 @@
+<record-table>
+    <record>
+        <record_id>1000</record_id>
+        <record_rows>
+        </record_rows>
+    </record>
+    <footer>
+        <record_count>1000</record_count>
+        <record_row_count>100000</record_row_count>
+    </footer>
+</record-table>

@@ -7,9 +7,7 @@ import java.util.List;
 @XmlRootElement(name = "record_row")
 public class Row {
     private List<String> string;
-
-    public Row() {
-    }
+    
 
     public List<String> getString() {
         return string;

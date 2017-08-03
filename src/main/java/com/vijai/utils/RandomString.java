@@ -8,7 +8,7 @@ public class RandomString {
          String alphabet= "abcdefghijklmnopqrstuvwxyz";
          String string = "";
          Random random = new Random();
-         for (int i = 0; i < 200; i++) {
+         for (int i = 0; i < random.nextInt(200); i++) {
              char c = alphabet.charAt(random.nextInt(26));
              string+=c;
          }

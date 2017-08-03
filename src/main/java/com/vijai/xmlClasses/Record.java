@@ -2,14 +2,13 @@ package com.vijai.xmlClasses;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 
 @XmlRootElement(name = "record")
 public class Record {
 
     private Long recordId;
-    private List<Row> recordRow;
+    private Row recordRow;
 
     public Record() {
     }
@@ -22,11 +21,11 @@ public class Record {
         this.recordId = recordId;
     }
 
-    public List<Row> getRecordRow() {
+    public Row getRecordRow() {
         return recordRow;
     }
     @XmlElement(name = "record_rows")
-    public void setRecordRow(List<Row> recordRow) {
+    public void setRecordRow(Row recordRow) {
         this.recordRow = recordRow;
     }
 }
