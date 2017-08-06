@@ -1,63 +1,34 @@
 package com.vijai;
 
-import com.sun.xml.internal.stream.events.XMLEventAllocatorImpl;
-import com.ximpleware.NavException;
-import com.ximpleware.XPathEvalException;
-import com.ximpleware.XPathParseException;
+
+import com.vijai.bussiness.XmlGenerator;
+import com.vijai.bussiness.splitting.Splitter;
+import com.vijai.bussiness.splitting.SplitterStAX;
 import org.xml.sax.SAXException;
+
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.util.XMLEventAllocator;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stax.StAXSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 public class Main {
 
-    private static XMLEventAllocator allocator;
+    public static void main(String[] args) throws JAXBException, IOException, SAXException, TransformerException, ParserConfigurationException, XMLStreamException {
+        XmlGenerator xml = new XmlGenerator();
+        //xml.generate();
 
-    public static void main(String[] args) throws XPathParseException, NavException, XPathEvalException, IOException, JAXBException, SAXException, XMLStreamException, TransformerException {
-       /* XmlGenerator xml = new XmlGenerator();
-        xml.generate();*/
-        int TAGS_SIZE = 0;
-        final int USER_GIVEN_SIZE = 2024 / 2; // bytes to chars
-        final int ROW_SIZE = 200 + 29;
-        String path = "src/main/resources/recordFile.xml";
-        File f = new File(path);
-        TAGS_SIZE = (int) f.length();
+        /*Splitter splitter = new Splitter();
+        splitter.split(2000);*/
 
-        XMLInputFactory xif = XMLInputFactory.newInstance();
-        xif.setEventAllocator(new XMLEventAllocatorImpl());
-        allocator = xif.getEventAllocator();
-        XMLStreamReader xsr = xif.createXMLStreamReader(new FileReader("src/main/resources/recordFile.xml"));
-        //xsr.nextTag(); // Advance to statements element
+        SplitterStAX splitterStAX = new SplitterStAX();
+        splitterStAX.split(2000);
 
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer t = tf.newTransformer();
-        int j = 0;
-        int eventType = xsr.getEventType();
-        while (xsr.hasNext()) {
-            eventType = xsr.next();
-            // Get all "record" elements as XMLEvent object
-            if (eventType == XMLStreamConstants.START_ELEMENT &&
-                    xsr.getLocalName().equals("record")) {
-                System.out.println(xsr.toString());
-                File file = new File("src/main/resources/" + j + ".xml");
-                t.transform(new StAXSource(xsr), new StreamResult(file));
-                j++;
-            }
-        }
     }
 }
-
+//XPathExpression splits = xpath.compile(".[sum(*/(string-length() + (string-length(name()) + 2 ) * 2  +1)) <1600]");
+//NodeList sp = (NodeList) splits.evaluate(doc, XPathConstants.STRING);
+//System.out.println(sp);
     /*private static void printEvent(XMLStreamReader xmlr) {
         System.out.print("EVENT:[" + xmlr.getLocation().getLineNumber() + "][" +
                 xmlr.getLocation().getColumnNumber() + "] ");
