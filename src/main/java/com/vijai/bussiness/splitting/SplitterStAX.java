@@ -28,23 +28,25 @@ public class SplitterStAX {
         String newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
         File file = new File(newFilePath);
 
-        //streamReader.next();
+
         while (streamReader.hasNext()) {
             streamReader.next();
-                if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                    while (streamReader.hasNext()) {
-                        if (file.length() <= USER_GIVEN_SIZE) {
+            if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
+                while (streamReader.hasNext()) {
+                    if (file.length() <= USER_GIVEN_SIZE) {
 
-                            FileOutputStream fileOutputStream = new FileOutputStream(file, true);
-                            transformer.transform(new StAXSource(streamReader), new StreamResult(fileOutputStream));
-                            streamReader.next();
-                        } else {
-                            filePartNumber++;
-                            newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
-                            file = new File(newFilePath);
-                        }
+                        FileOutputStream fileOutputStream = new FileOutputStream(file, true);
+                        transformer.transform(new StAXSource(streamReader), new StreamResult(fileOutputStream));
+                        streamReader.next();
+                    } else {
+                        filePartNumber++;
+                        newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
+                        file = new File(newFilePath);
                     }
                 }
+            }
+
         }
+        streamReader.close();
     }
 }
