@@ -24,7 +24,8 @@ public class Main {
         splitter.split(2000);*/
 
         SplitterStAX splitterStAX = new SplitterStAX();
-        splitterStAX.split(2000);
+        splitterStAX.split(1000);
+
 
     }
 }

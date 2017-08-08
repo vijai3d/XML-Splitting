@@ -17,7 +17,7 @@ import java.io.*;
 public class SplitterStAX {
 
     public void split(int USER_GIVEN_SIZE) throws IOException, XMLStreamException, TransformerException, XPathParseException, NavException, XPathEvalException {
-        int filePartNumber=0;
+        /*int filePartNumber=0;
         VTDGen vg = new VTDGen();
         if (!vg.parseFile("src/main/resources/recordFile.xml", false)){
             System.out.println("error");
@@ -41,46 +41,51 @@ public class SplitterStAX {
                     fos.write(String.valueOf(recordCounter).getBytes());
                     fos.write("</footer>".getBytes());
                     fos.write("</record-table>".getBytes());
-
                 } else {
                     fos.close();
                     filePartNumber++;
                     file = new File("src/main/resources/part" + filePartNumber + ".xml");
                     fos =new FileOutputStream(file);
 
-
                     long l = vn.getElementFragment();
                     fos.write(vn.getXML().getBytes(), (int)l, (int)(l>>32));
-
                 }
+        }*/
 
-
-
-        }
-
-        /*  long filePartNumber = 0;
+        long filePartNumber = 0;
         boolean allowNextTag = true;
 
         String newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
         //InputStream in = new FileInputStream(filename);
-
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         //XMLEventReader reader = factory.createXMLEventReader(filename, in);
         //XMLEventWriter writer = xof.createXMLEventWriter(out);
         String filePath = "src/main/resources/recordFile.xml";
         InputStream xmlInputStream = new FileInputStream(filePath);
-        XMLInputFactory2 xmlInputFactory = (XMLInputFactory2)XMLInputFactory.newInstance();
+        XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newInstance();
         XMLStreamReader2 streamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(xmlInputStream);
         File file = new File(newFilePath);
+        FileOutputStream fos = new FileOutputStream(file);
         XMLOutputFactory2 xmlOutputFactory = (XMLOutputFactory2) XMLOutputFactory.newFactory();
-        XMLStreamWriter2 streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file)));
-
+        XMLStreamWriter2 streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter(fos);
+        int recordCount =0;
         while (streamReader.hasNext()) {
             if (allowNextTag) {
                 streamReader.next();
             }
-            if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
+            if ( streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")  ) {
                 if (file.length() <= USER_GIVEN_SIZE) {
-                    XmlReaderToWriter.write(streamReader, streamWriter);
+                    recordCount++;
+                    fos.write("<record-table>".getBytes());
+                    fos.write('\n');
+                    fos = new FileOutputStream(file, true);
+
+                    transformer.transform( new StAXSource(streamReader), new StreamResult(fos));
+                    fos.write("</record-table>".getBytes());
+                    fos.write('\n');
+                    //XmlReaderToWriter.write(streamReader, streamWriter);
                     //streamWriter.copyEventFromReader(streamReader,true);
                     allowNextTag = true;
                 } else {
@@ -88,12 +93,11 @@ public class SplitterStAX {
                     filePartNumber++;
                     newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
                     file = new File(newFilePath);
-                    streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file)));
+                    //streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file)));
                 }
             }
         }
         streamReader.close();
-*/
         /*XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         FileReader fileReader = new FileReader("src/main/resources/recordFile.xml");
         XMLStreamReader2 streamReader = (XMLStreamReader2) inputFactory.createXMLStreamReader(fileReader);
