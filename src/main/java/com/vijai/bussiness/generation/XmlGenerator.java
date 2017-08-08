@@ -1,4 +1,4 @@
-package com.vijai.bussiness;
+package com.vijai.bussiness.generation;
 
 import com.vijai.utils.RandomString;
 import com.vijai.utils.XmlValidation;

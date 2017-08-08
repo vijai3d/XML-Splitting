@@ -1,9 +1,11 @@
 package com.vijai;
 
 
-import com.vijai.bussiness.XmlGenerator;
-import com.vijai.bussiness.splitting.Splitter;
+import com.vijai.bussiness.generation.XmlGenerator;
 import com.vijai.bussiness.splitting.SplitterStAX;
+import com.ximpleware.NavException;
+import com.ximpleware.XPathEvalException;
+import com.ximpleware.XPathParseException;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -14,7 +16,7 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) throws JAXBException, IOException, SAXException, TransformerException, ParserConfigurationException, XMLStreamException {
+    public static void main(String[] args) throws JAXBException, IOException, SAXException, TransformerException, ParserConfigurationException, XMLStreamException, XPathParseException, NavException, XPathEvalException {
         XmlGenerator xml = new XmlGenerator();
         //xml.generate();
 
