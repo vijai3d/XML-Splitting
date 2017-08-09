@@ -13,6 +13,8 @@ import org.codehaus.stax2.XMLStreamReader2;
 import org.codehaus.stax2.XMLStreamWriter2;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplitterStAX {
 
@@ -54,12 +56,14 @@ public class SplitterStAX {
 
         long filePartNumber = 0;
         boolean allowNextTag = true;
+        int recordCount =0;
 
         String newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
         //InputStream in = new FileInputStream(filename);
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         //XMLEventReader reader = factory.createXMLEventReader(filename, in);
         //XMLEventWriter writer = xof.createXMLEventWriter(out);
         String filePath = "src/main/resources/recordFile.xml";
@@ -70,32 +74,35 @@ public class SplitterStAX {
         FileOutputStream fos = new FileOutputStream(file);
         XMLOutputFactory2 xmlOutputFactory = (XMLOutputFactory2) XMLOutputFactory.newFactory();
         XMLStreamWriter2 streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter(fos);
-        int recordCount =0;
+
         while (streamReader.hasNext()) {
             if (allowNextTag) {
                 streamReader.next();
             }
-            if ( streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")  ) {
-                if (file.length() <= USER_GIVEN_SIZE) {
-                    recordCount++;
-                    fos.write("<record-table>".getBytes());
-                    fos.write('\n');
-                    fos = new FileOutputStream(file, true);
+                if ( streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
+                    if (file.length() <= USER_GIVEN_SIZE) {
+                        recordCount++;
+                        fos.write("<record-table>".getBytes());
+                        fos.write('\n');
 
-                    transformer.transform( new StAXSource(streamReader), new StreamResult(fos));
-                    fos.write("</record-table>".getBytes());
-                    fos.write('\n');
-                    //XmlReaderToWriter.write(streamReader, streamWriter);
-                    //streamWriter.copyEventFromReader(streamReader,true);
-                    allowNextTag = true;
-                } else {
-                    allowNextTag = false;
-                    filePartNumber++;
-                    newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
-                    file = new File(newFilePath);
-                    //streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file)));
+                        fos = new FileOutputStream(file, true);
+                        transformer.transform(new StAXSource(streamReader), new StreamResult(fos));
+
+
+                        fos.write("</record-table>".getBytes());
+                        fos.write('\n');
+                        //XmlReaderToWriter.write(streamReader, streamWriter);
+                        //streamWriter.copyEventFromReader(streamReader,true);
+                        allowNextTag = true;
+                    } else {
+                        allowNextTag = false;
+                        filePartNumber++;
+                        newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
+                        file = new File(newFilePath);
+                        //streamWriter = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file)));
+                    }
                 }
-            }
+
         }
         streamReader.close();
         /*XMLInputFactory inputFactory = XMLInputFactory.newInstance();
