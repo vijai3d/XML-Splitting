@@ -5,7 +5,10 @@ import com.ximpleware.NavException;
 import com.ximpleware.XPathEvalException;
 import com.ximpleware.XPathParseException;
 import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
+import org.codehaus.stax2.XMLStreamWriter2;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -17,6 +20,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
 public class SplitterStAX {
@@ -38,10 +42,10 @@ public class SplitterStAX {
         XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newInstance();
         XMLStreamReader2 streamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(xmlInputStream);
         File file = new File(newFilePath);
-        FileOutputStream fos = new FileOutputStream(file);
+        FileOutputStream fos = new FileOutputStream(file, true);
 
-        XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
-        XMLStreamWriter streamWriter = xmlOutputFactory.createXMLStreamWriter(fos);
+        XMLOutputFactory xmlOutputFactory =  XMLOutputFactory.newFactory();
+        XMLStreamWriter streamWriter =  xmlOutputFactory.createXMLStreamWriter(fos);
 
         while (streamReader.hasNext()) {
 
@@ -49,46 +53,51 @@ public class SplitterStAX {
                 streamReader.next();
             }
             if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
+                    if (file.length() <= USER_GIVEN_SIZE) {
+                        if (recordCounter == 0) {
+                            fos = new FileOutputStream(file, true);
+                            streamWriter = xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file, true)));
+                            streamWriter = new IndentingXMLStreamWriter(streamWriter);
+                            streamWriter.writeStartDocument();
+                            streamWriter.flush();
+                            fos.write("<record-table>".getBytes());
+                            fos.write('\n');
 
-                if (file.length() <= USER_GIVEN_SIZE) {
-                    if (recordCounter == 0) {
-                        streamWriter = xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file, true)));
-                        streamWriter = new IndentingXMLStreamWriter(streamWriter);
-                        streamWriter.writeStartDocument();
-                        streamWriter.writeStartElement("record-table");
+                            fos.flush();
+
+                        }
+                        recordCounter++;
+
+                        fos = new FileOutputStream(file, true);
+                        //XmlReaderToWriter.write(streamReader, streamWriter);
+                        fos.write('\t');
+                        transformer.transform(new StAXSource(streamReader), new StreamResult(fos));
+                        allowNextTag = true;
+                    } else {
+                        recordRowCounter = new WordCounter().countWord("<record_row>", file);
+                        streamWriter.writeStartElement("footer");
+                        streamWriter.writeStartElement("record_count");
+                        streamWriter.writeCharacters(String.valueOf(recordCounter));
+                        streamWriter.writeEndElement();
+                        streamWriter.writeStartElement("record_row_count");
+                        streamWriter.writeCharacters(String.valueOf(recordRowCounter));
+                        streamWriter.writeEndElement();
+                        streamWriter.writeEndElement();
+                        streamWriter.writeEndDocument();
                         streamWriter.flush();
+                        streamWriter.close();
+                        fos.write('\n');
+                        fos.write("</record-table>".getBytes());
+                        fos.flush();
+                        fos.close();
+
+                        recordCounter = 0;
+                        allowNextTag = false;
+                        filePartNumber++;
+                        newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
+                        file = new File(newFilePath);
+
                     }
-                    recordCounter++;
-
-                    fos = new FileOutputStream(file, true);
-                    transformer.transform(new StAXSource(streamReader), new StreamResult(fos));
-
-
-                    allowNextTag = true;
-                } else {
-                    recordRowCounter = new WordCounter().countWord("<record_row>",file);
-                    streamWriter.writeStartElement("footer");
-                    streamWriter.writeStartElement("record_count");
-                    streamWriter.writeCharacters(String.valueOf(recordCounter));
-                    streamWriter.writeEndElement();
-                    streamWriter.writeStartElement("record_row_count");
-                    streamWriter.writeCharacters(String.valueOf(recordRowCounter));
-                    streamWriter.writeEndElement();
-                    streamWriter.writeEndElement();
-                    streamWriter.writeEndElement();
-                    streamWriter.writeEndDocument();
-                    streamWriter.flush();
-                    streamWriter.close();
-
-                    recordCounter = 0;
-                    System.out.println(recordRowCounter);
-
-                    allowNextTag = false;
-                    filePartNumber++;
-                    newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
-                    file = new File(newFilePath);
-
-                }
             }
         }
         streamReader.close();
