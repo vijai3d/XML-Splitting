@@ -72,18 +72,27 @@ public class SplitterStAX {
         XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newInstance();
         XMLStreamReader2 streamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(xmlInputStream);
         File file = new File(newFilePath);
-        FileOutputStream fos = new FileOutputStream(file, true);
+        FileOutputStream fos = new FileOutputStream(file);
 
         XMLOutputFactory xmlOutputFactory =  XMLOutputFactory.newFactory();
         XMLStreamWriter streamWriter = xmlOutputFactory.createXMLStreamWriter(fos);
-        streamWriter = new IndentingXMLStreamWriter(streamWriter);
+        //streamWriter = new IndentingXMLStreamWriter(streamWriter);
+
         while (streamReader.hasNext()) {
 
             if (allowNextTag) {
                 streamReader.next();
             }
                 if ( streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                    if (file.length() <= USER_GIVEN_SIZE-100) {
+
+                    if (file.length() <= USER_GIVEN_SIZE) {
+                        if (recordCount==0) {
+                            streamWriter = xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file,true)));
+                            streamWriter = new IndentingXMLStreamWriter(streamWriter);
+                            streamWriter.writeStartDocument();
+                            streamWriter.writeStartElement("record-table");
+                            streamWriter.flush();
+                        }
                         recordCount++;
 
                         fos = new FileOutputStream(file, true);
@@ -101,6 +110,7 @@ public class SplitterStAX {
                         streamWriter.writeCharacters("???");
                         streamWriter.writeEndElement();
                         streamWriter.writeEndElement();
+                        streamWriter.writeEndElement();
                         streamWriter.writeEndDocument();
                         streamWriter.flush();
                         streamWriter.close();
@@ -110,8 +120,7 @@ public class SplitterStAX {
                         filePartNumber++;
                         newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
                         file = new File(newFilePath);
-                        streamWriter = xmlOutputFactory.createXMLStreamWriter((new FileOutputStream(file,true)));
-                        streamWriter = new IndentingXMLStreamWriter(streamWriter);
+
 
                     }
                 }
