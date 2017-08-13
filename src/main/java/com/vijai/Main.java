@@ -27,7 +27,7 @@ public class Main {
         SplitterStAX splitterStAX = new SplitterStAX();
         //splitterStAX.split(1000);
         SplitterJAXB splitterJAXB = new SplitterJAXB();
-        splitterJAXB.split();
+        splitterJAXB.split(100);
 
     }
 }

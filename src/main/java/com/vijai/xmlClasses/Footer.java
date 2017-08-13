@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "footer")
 public class Footer {
     private long recordCount;
-    private int recordRowCount;
+    private long recordRowCount;
 
     public Footer() {
     }
@@ -19,11 +19,11 @@ public class Footer {
         this.recordCount = recordCount;
     }
 
-    public int getRecordRowCount() {
+    public long getRecordRowCount() {
         return recordRowCount;
     }
     @XmlElement(name = "record_row_count")
-    public void setRecordRowCount(int recordRowCount) {
+    public void setRecordRowCount(long recordRowCount) {
         this.recordRowCount = recordRowCount;
     }
 }

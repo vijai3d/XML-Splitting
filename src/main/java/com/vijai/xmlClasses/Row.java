@@ -15,5 +15,7 @@ public class Row {
     @XmlElement(name = "record_row")
     public void setString(List<String> string) {
         this.string = string;
+
     }
+
 }
