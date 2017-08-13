@@ -1,5 +1,6 @@
 package com.vijai.bussiness.splitting;
 
+import com.vijai.xmlClasses.Footer;
 import com.vijai.xmlClasses.Record;
 import com.vijai.xmlClasses.RecordTable;
 import org.codehaus.stax2.XMLInputFactory2;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class SplitterJAXB {
 
-    public void split() throws FileNotFoundException, XMLStreamException, JAXBException {
+    public void split() throws IOException, XMLStreamException, JAXBException {
         long filePartNumber = 0;
         boolean allowNextTag = true;
         long recordCounter = 0;
@@ -28,17 +29,43 @@ public class SplitterJAXB {
         XMLStreamReader streamReader =  xmlInputFactory.createXMLStreamReader(xmlInputStream);
         JAXBContext context = JAXBContext.newInstance(RecordTable.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        List<Record> recordList = new ArrayList<Record>();
-        while (streamReader.hasNext()) {
-            streamReader.next();
-            if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                JAXBElement<Record> unmarshalledObj = unmarshaller.unmarshal(streamReader, Record.class);
-                Record record = unmarshalledObj.getValue();
-                recordList.add(record);
+        File file = new File(newFilePath);
 
-                Marshaller marshaller = context.createMarshaller();
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                marshaller.marshal(unmarshalledObj, System.out);
+        Marshaller marshaller = context.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        List<Record> recordList = new ArrayList<Record>();
+
+        while (streamReader.hasNext()) {
+            if (allowNextTag) {
+                streamReader.next();
+            }
+            if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
+
+                if (file.length() <= 1000) {
+                    recordCounter++;
+                    FileOutputStream fos = new FileOutputStream(file);
+                    JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
+                    Record record = recordObj.getValue();
+                    recordList.add(record);
+                    RecordTable recordTable = new RecordTable();
+                    recordTable.setRecord(recordList);
+
+                    Footer footer = new Footer();
+                    footer.setRecordCount(recordCounter);
+                    footer.setRecordRowCount();
+                    recordTable.setFooter(footer);
+                    marshaller.marshal(recordTable, fos);
+
+                    allowNextTag = true;
+                } else {
+                    recordList.clear();
+                    recordCounter = 0;
+                    allowNextTag = false;
+                    filePartNumber++;
+                    newFilePath = "src/main/resources/part" + filePartNumber + ".xml";
+                    file = new File(newFilePath);
+                }
             }
         }
         streamReader.close();
