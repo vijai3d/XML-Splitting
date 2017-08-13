@@ -2,6 +2,7 @@ package com.vijai;
 
 
 import com.vijai.bussiness.generation.XmlGenerator;
+import com.vijai.bussiness.splitting.SplitterJAXB;
 import com.vijai.bussiness.splitting.SplitterStAX;
 import com.ximpleware.NavException;
 import com.ximpleware.XPathEvalException;
@@ -24,8 +25,9 @@ public class Main {
         splitter.split(2000);*/
 
         SplitterStAX splitterStAX = new SplitterStAX();
-        splitterStAX.split(1000);
-
+        //splitterStAX.split(1000);
+        SplitterJAXB splitterJAXB = new SplitterJAXB();
+        splitterJAXB.split();
 
     }
 }
